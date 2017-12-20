@@ -20,6 +20,7 @@ genomeVgenome <- comboDF[,c("G.Size..MB.","C.Size.Mb.")]
 
 #Creating a ratio of whole genome size / chloroplast genome size
 comboDF$Ratio <- comboDF$G.Size..MB./comboDF$C.Size.Mb.
+mean(comboDF$Ratio)
 norm(comboDF$Ratio)
 hist(comboDF$Ratio)
 norm(log(comboDF$Ratio))
@@ -31,11 +32,10 @@ head(adjusted_genomeVgenome)
 max(adjusted_genomeVgenome$G.Size..MB.)
 
 #First genome plot shows a huge cluster in one area of the graph due overlap of many data points
-genomePlot <- ggplot(adjusted_genomeVgenome, aes(x=G.Size..MB., y=C.Size.Mb.)) + geom_point(shape=21)
-genomePlot
-
+genomePlot <- ggplot(adjusted_genomeVgenome, aes(x=G.Size..MB., y=C.Size.Mb.)) + geom_point()
+genomePlot + labs(x = "Nuclear Genome Size", y = "Chloroplast Genome Size", title = "Chloroplast V Nuclear Genome Size") + geom_point(position=position_jitter(width=.5, height=0))
 #"Jittering the plot to remove some of the noise and enhance visualization
-genomePlot + geom_point(position=position_jitter(width=.5, height=0))
+
 
 #Generating some basic stats (mean, standard deviation, variance) for whole genome size both transformed and un-transformed
 #Mean
@@ -51,7 +51,7 @@ transG_dat <- log(G.Size..MB.)
 #Testing normality of transformed data
 norm(transG_dat)
 #Generating a histogram of the transformed data
-hist(transG_dat)
+hist(transG_dat, xlab = "Whole Genome (Mb)", main = "Histogram of Log Transformed Whole Genome Data")
 
 
 #Generating some basic stats (mean, standard deviation, variance) for chloroplast genome size both transformed and un-transformed
@@ -66,13 +66,13 @@ norm(C.Size.Mb.)
 #Transforming the Chloroplast genome size data to achieve normality
 transC_dat <- log(C.Size.Mb.)
 #Histogram of transformed data
-hist(transC_dat)
+hist(transC_dat, xlab ="Chloroplast Genome (Mb)", main = "Histogram of Log Transformed Chloroplast Data")
 #Testing normality of transformed chloroplast data
 norm(transC_dat)
 
 
 #Calculating the Pearson's correlation coefficient for the transformed data due to lack of normality in chloroplast data
-cor.test(transG_dat,transC_dat,method = "pearson")
+cor.test(transG_dat,transC_dat,method = "spearman")
 
 #Generating plots for transformed data
 transDat <- data.frame(cbind(transG_dat, transC_dat))
@@ -85,5 +85,5 @@ transPlot + geom_point(position=position_jitter(width=.5, height=0))
 genomeLM = lm(transDat$transC_dat~transDat$transG_dat)
 summary(genomeLM)
 #Generating plots to determine whether the application of the linear model is valid
-par(mfrow=c(2,2))
+par(mfrow=c(1,2))
 plot(genomeLM)
